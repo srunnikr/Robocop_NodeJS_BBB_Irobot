@@ -9,7 +9,9 @@ Whenever a break in attempt is informed by the sensor network the IRobot drives 
 
 The user can also drive the robot remotely using the remote drive feature via the web interface.
 
-The demo video can be found under the docs directory.
+The demo video can be found in youtube here,
+
+https://www.youtube.com/watch?v=8jSKl9UZkOU&feature=youtu.be
 
 Thanks!
 
