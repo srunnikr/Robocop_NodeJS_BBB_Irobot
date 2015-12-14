@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>S2E Surveillance</title>
+	<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.js"></script>
+	<script src="/socket.io/socket.io.js"></script>
+	<link rel="stylesheet" type="text/css" href="style.css">
+    <style type="text/css">
+        .btn-circle {
+            width: 30px;
+            height: 30px;
+            text-align: center;
+            padding: 6px 0;
+            font-size: 12px;
+            line-height: 1.428571429;
+            border-radius: 15px;
+        }
+        .btn-circle.btn-lg {
+            width: 50px;
+            height: 50px;
+            padding: 13px 13px;
+            font-size: 18px;
+            line-height: 1.33;
+            border-radius: 25px;
+        }
+        div.row {
+            padding-left: 35px;
+        }
+    </style>
+</head>
+<body>
+
+	<nav class="navbar navbar-default">
+        <div class="container-fluid">
+            <ul class="nav navbar-nav">
+                <li role="presentation" class="active"><a href="192.168.43.249:5000/">Home</a></li>
+            </ul>
+
+            <ul class="nav navbar-nav navbar-right">
+                <li role="presentation"><a href="192.168.43.249:5000/about.html">About</a></li>
+                <li role="presentation"><a href="192.168.43.249:5000/help.html">Help</a></li>
+            </ul>
+        </div>
+    </nav>
+
+	<div class="row">
+        <div class="col-md-12">
+            <h3 class="text-center"> S2E Surveillance </h3>
+        </div>
+    </div>
+
+
+    <div class="row" style="padding-top:20px">
+        <div class="col-md-3" style="padding-top:8px">
+            <h4>System status</h4>
+        </div>
+    </div>
+
+    <div class="row" style="padding-top:10px">
+        <div class="col-md-1">
+            <label class="btn btn-success btn-circle" id="systemStatusCircle"></label>
+        </div>
+        <div class="col-md-1" style="padding-top:8px">
+            <p id="systemStatusText">OK</p>
+        </div>
+        <div class="col-md-3">
+            <button type="button" class="btn btn-default" id="resetAlertButton">Remove alert</button>
+        </div>
+    </div>
+
+    <div class="row" style="padding-top:15px">
+		<div class="col-md-2">
+			<button type="button" class="btn btn-default" id="getPicButton">Send me a pic</button>
+		</div>
+    </div>
+
+    <div class="row" style="padding-top:10px">
+    	<div class="col-md-3" style="padding-top:8px">
+    		<h4>Sensor status</h4>
+    	</div>
+    </div>
+
+    <div class="row" style="padding-top:10px">
+    	<div class="col-md-1">
+    		<h5>Sensor 1</h5>
+    	</div>
+    	<div class="col-md-3" style="padding-top:8px">
+    		<span class="sensor1 glyphicon glyphicon-remove" id="sensor1Status"></span>
+    	</div>
+    </div>
+
+    <div class="row" style="padding-top:5px">
+    	<div class="col-md-1">
+    		<h5>Sensor 2</h5>
+    	</div>
+    	<div class="col-md-3" style="padding-top:8px">
+    		<span class="sensor2 glyphicon glyphicon-remove" id="sensor2Status"></span>
+    	</div>
+    </div>
+
+    <div class="row" style="padding-top:10px">
+    	<div class="col-md-2">
+    		<h4>
+    			Remote drive
+    		</h4>
+    	</div>
+    </div>
+
+    <!-- Aria label is to check whether button is accessible or not -->
+    <div class="row" style="padding-top:10px">
+    	<div class="col-md-6" style="padding-top:8px">
+    		<div class="button-group" role="driveGroup">
+			    <button type="button" class="btn btn-default" aria-label="Left Align" id="driveFwdButton">
+			  		<span class="glyphicon glyphicon-arrow-up" aria-hidden="true"></span> Forward
+				</button> 
+				<button type="button" class="btn btn-default" aria-label="Left Align" id="driveBackButton">
+			  		<span class="glyphicon glyphicon-arrow-down" aria-hidden="true"></span> Reverse
+				</button>
+				<button type="button" class="btn btn-default" aria-label="Left Align" id="driveLeftButton">
+			  		<span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span> Left
+				</button>
+				<button type="button" class="btn btn-default" aria-label="Left Align" id="driveRightButton">
+			  		<span class="glyphicon glyphicon-arrow-right" aria-hidden="true"></span> Right
+				</button>
+			</div>
+		</div>
+	</div>
+
+    <div class="row" style="padding-top:10px">
+        <div class="col-md-8">
+            <img id="imageField" src="">
+        </div>
+    </div>
+
+    <script type="text/javascript">
+
+    $(document).ready(function() {
+
+        var socket = io.connect();
+
+        // Initial update of the sensor status
+        socket.emit('sensorStatusQuery');
+
+	// On sensor disturbance event
+        socket.on('sensor1DisturbanceDetectedClient', function() {
+            console.log("testtttt  Sensor 1 disturbance detected");
+            $('#systemStatusCircle').removeClass('btn-success');
+            $('#systemStatusCircle').addClass('btn-danger');
+            $('#systemStatusText').text("ALERT!!!");
+	    //$('#imageField').attr('src',"http://192.168.43.249:1500/image?"+Math.random());
+        });
+        socket.on('sensor2DisturbanceDetected', function() {
+            console.log("Sensor 2 disturbance detected");
+            $('#systemStatusCircle').removeClass('btn-success');
+            $('#systemStatusCircle').addClass('btn-danger');
+            $('#systemStatusText').text("ALERT!!!");
+	    //$('#imageField').attr('src',"http://192.168.43.249:1500/image?"+Math.random());
+        });
+
+
+        // Remote drive functions for irobot
+        $('#getPicButton').click(function() {
+            console.log("Send a pic key pressed");
+            socket.emit('needImage');
+        });
+        $('#driveFwdButton').click(function() {
+            console.log("Drive forward button pressed");
+            socket.emit('remoteDriveFwd');
+        });
+        $('#driveBackButton').click(function() {
+            console.log("Drive backward button pressed");
+            socket.emit('remoteDriveBack');
+        });
+        $('#driveLeftButton').click(function() {
+            console.log("Drive left button pressed");
+            socket.emit('remoteDriveLeft');
+        });
+        $('#driveRightButton').click(function() {
+            console.log("Drive right button pressed");
+            socket.emit('remoteDriveRight');
+        });
+        // For alert reset option
+        $('#resetAlertButton').click(function() {
+            console.log("Alert reset button pressed");
+            $('#systemStatusCircle').removeClass('btn-danger');
+            $('#systemStatusCircle').addClass('btn-success');
+            $('#systemStatusText').text("OK");
+	    $('#imageField').attr('src','');	
+        });
+
+        // Glyphicon update based on the sensor status message received from server
+        socket.on('updateSensor1On', function() {
+            console.log("Sensor 1 Alive message received");
+            $('#sensor1Status').removeClass('glyphicon-remove');
+            $('#sensor1Status').addClass('glyphicon-ok');
+        });
+        socket.on('updateSensor1Off', function() {
+            console.log("Sensor 1 not active message received");
+            $('#sensor1Status').removeClass('glyphicon-ok');
+            $('#sensor1Status').addClass('glyphicon-remove');
+        });
+        socket.on('updateSensor2On', function() {
+            console.log("Sensor 2 Alive message received");
+            $('#sensor2Status').removeClass('glyphicon-remove');
+            $('#sensor2Status').addClass('glyphicon-ok');
+        });
+        socket.on('updateSensor2Off', function() {
+            console.log("Sensor 2 not active message received");
+            $('#sensor2Status').removeClass('glyphicon-ok');
+            $('#sensor2Status').addClass('glyphicon-remove');
+        });
+
+	function updateSensor1On() {
+            console.log("Sensor 1 Alive message received");
+            $('#sensor1Status').removeClass('glyphicon-remove');
+            $('#sensor1Status').addClass('glyphicon-ok');
+        }
+
+        function updateSensor1Off() {
+            console.log("Sensor 1 not active message received");
+            $('#sensor1Status').removeClass('glyphicon-ok');
+            $('#sensor1Status').addClass('glyphicon-remove');
+        }
+
+        function updateSensor2Off() {
+            onsole.log("Sensor 2 not active message received");
+            $('#sensor2Status').removeClass('glyphicon-ok');
+            $('#sensor2Status').addClass('glyphicon-remove');
+        }
+
+        function updateSensor2On() {
+            console.log("Sensor 2 Alive message received");
+            $('#sensor2Status').removeClass('glyphicon-remove');
+            $('#sensor2Status').addClass('glyphicon-ok');
+        }
+
+        socket.on('sensorStatusQueryResponse', function(data) {
+            console.log("Sensor status query response received");
+            var sensor1 = data.sensor1;
+            var sensor2 = data.sensor2;
+	    console.log(sensor1);
+            console.log(sensor2);
+            if (sensor1 == "OK") {
+                //socket.emit('updateSensor1On');
+                updateSensor1On();
+            } else {
+                //socket.emit('updateSensor1Off');
+                updateSensor1Off();
+            }
+            if (sensor2 == "OK") {
+                //socket.emit('updateSensor2On');
+                updateSensor2On();
+            } else {
+                //socket.emit('updateSensor2Off');
+                updateSensor2Off();
+            }
+	}); 
+
+        socket.on('imageUrl', function(data) {
+            // Code to update the imageField using jQuery
+            // May need to do it multiple times to get the latest imageField
+	    console.log("Received image url event");
+	    $('#imageField').attr('src',"http://192.168.43.249:1500/image?"+Math.random());        
+	});
+
+    });
+
+    </script>
+
+</body>
+</html>
